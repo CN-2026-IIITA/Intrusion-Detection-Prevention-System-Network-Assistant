@@ -1,45 +1,66 @@
-import React from 'react';
-import { Shield, Wifi, Zap } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import io from 'socket.io-client';
+import { Shield, Wifi } from 'lucide-react';
+
+const SOCKET_URL = 'http://localhost:3000';
 
 const App = () => {
+  const [packets, setPackets] = useState([]);
+  const [isConnected, setIsConnected] = useState(false);
+  const [maxPackets] = useState(50);
+
+  useEffect(() => {
+    const socket = io(SOCKET_URL);
+    socket.on('connect', () => setIsConnected(true));
+    socket.on('disconnect', () => setIsConnected(false));
+
+    socket.on('live_traffic', (data) => {
+      setPackets((prev) => [data, ...prev].slice(0, maxPackets));
+    });
+
+    return () => socket.disconnect();
+  }, [maxPackets]);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 relative">
-    <div className="max-w-[1600px] mx-auto space-y-6">
-
-    <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-    <div>
-    <h1 className="text-4xl font-bold tracking-tight flex items-center gap-3 glow-text">
-    <Shield className="text-cyan-400" size={36} />
-    NetOps <span className="text-cyan-400">Observer</span>
+    <div className="max-w-[1200px] mx-auto space-y-6">
+    <header className="flex justify-between items-center">
+    <h1 className="text-4xl font-bold flex items-center gap-3">
+    <Shield className="text-cyan-400" size={36} /> NetOps Observer
     </h1>
-    <p className="text-slate-400 mt-1">Hybrid Machine Learning Intrusion Prevention System</p>
-    </div>
     <div className="glass-card px-4 py-2 flex items-center gap-3">
-    <div className="w-2.5 h-2.5 rounded-full bg-slate-500 shadow-[0_0_10px_#64748b]"></div>
-    <span className="font-semibold text-sm tracking-wide text-slate-400">SYSTEM INITIALIZING...</span>
+    <div className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+    <span>{isConnected ? 'CONNECTED' : 'OFFLINE'}</span>
     </div>
     </header>
 
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    <div className="lg:col-span-2 glass-card p-6 flex flex-col h-[700px]">
-    <div className="flex justify-between items-center mb-6">
-    <h2 className="text-xl font-semibold flex items-center gap-2">
-    <Wifi className="text-cyan-400" size={24} />
-    Live Traffic Feed
-    </h2>
-    </div>
-    <div className="flex-1 flex flex-col items-center justify-center text-slate-500 space-y-4">
-    <Zap size={48} className="text-slate-700" />
-    <p>Frontend scaffolded. Waiting for backend integration...</p>
-    </div>
-    </div>
-
     <div className="glass-card p-6 flex flex-col h-[700px]">
-    <h2 className="text-xl font-semibold mb-6">System Status</h2>
-    <p className="text-slate-500 text-center mt-10">UI Shell Loaded. Data stream offline.</p>
+    <h2 className="text-xl font-semibold flex items-center gap-2 mb-6">
+    <Wifi className="text-cyan-400" size={24} /> Live Traffic Feed
+    </h2>
+    <div className="flex-1 overflow-auto">
+    <table className="w-full text-left border-collapse">
+    <thead>
+    <tr className="text-slate-400 border-b border-slate-800">
+    <th className="p-3">Protocol</th>
+    <th className="p-3">Source</th>
+    <th className="p-3">Target</th>
+    <th className="p-3">Classification</th>
+    </tr>
+    </thead>
+    <tbody>
+    {packets.map((pkt, idx) => (
+      <tr key={idx} className="border-b border-slate-800/50 hover:bg-slate-800/20">
+      <td className="p-3">{pkt.protocol}</td>
+      <td className="p-3">{pkt.source_ip}:{pkt.source_port}</td>
+      <td className="p-3">{pkt.dest_ip}:{pkt.dest_port}</td>
+      <td className="p-3">{pkt.classification} ({pkt.confidence}%)</td>
+      </tr>
+    ))}
+    </tbody>
+    </table>
     </div>
     </div>
-
     </div>
     </div>
   );
