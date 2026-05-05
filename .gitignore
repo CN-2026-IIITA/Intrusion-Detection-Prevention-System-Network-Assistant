@@ -1,0 +1,60 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv_ml/
+.venv_313/
+
+# Jupyter Notebook
+**/.ipynb_checkpoints/
+
+# Machine Learning & Large Data Files
+*.csv
+*.pcap
+*.pcapng
+*.zip
+*.tar.gz
+*.rar
+
+# Dataset directories (downloaded by fetch_dataset.py)
+sensor/models/MachineLearningCVE/
+
+# Exclude generated ML models if they are too large (>100MB)
+# ids_model.pkl is ~2.1MB, so it is safe to commit if you want, 
+# but if you prefer to generate it locally, uncomment the line below:
+# sensor/models/*.pkl
+
+# Database
+backend/ids_logs.db
+
+# C++ Compiled Executable
+sensor/sensor_core
+
+# Node.js (Backend & Frontend)
+node_modules/
+backend/node_modules/
+frontend/node_modules/
+npm-debug.log
+yarn-error.log
+
+# Vite/React Build Output
+frontend/dist/
+frontend/dist-ssr/
+
+# Optional: If you want to force git to ignore lock files (not recommended for production, but fine for assignments)
+package-lock.json
